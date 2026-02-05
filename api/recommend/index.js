@@ -286,8 +286,11 @@ module.exports = async function (context, req) {
       return;
     }
 
-    const kb = readKbJson(req);
-    const inputs = req.body || {};
+    const kb = await readKbJson(req);
+    let inputs = req.body || {};
+if (typeof inputs === "string") {
+  try { inputs = JSON.parse(inputs); } catch { inputs = {}; }
+}
 
     const userMsg =
       `KNOWLEDGE_BASE_JSON:\n${JSON.stringify(kb)}\n\n` +
