@@ -218,7 +218,9 @@ const JSON_SCHEMA = {
 async function callAzureOpenAI({ endpoint, apiKey, deployment, system, user, schema }) {
   // Uses Azure OpenAI Chat Completions with structured output request shape.
   // (We can migrate to Responses API later if desired.)
-  const url = `${endpoint}/openai/deployments/${deployment}/chat/completions?api-version=2024-10-21`;
+const base = endpoint.replace(/\/+$/, "");
+const url = `${base}/openai/deployments/${deployment}/chat/completions?api-version=2024-08-01-preview`;
+
 
   const body = {
     messages: [
