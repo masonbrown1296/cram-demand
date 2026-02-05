@@ -10,7 +10,7 @@ const path = require("path");
 function readKbJson() {
   // When deployed on SWA, the repo files are available in the function app filesystem.
   // This path works both locally and in SWA build output.
-  const kbPath = path.join(process.cwd(), "src", "data", "kb_dummy_v1.json");
+  const kbPath = path.join(process.cwd(), "web", "data", "kb_dummy_v1.json");
   const raw = fs.readFileSync(kbPath, "utf8");
   return JSON.parse(raw);
 }
