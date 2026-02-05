@@ -7,12 +7,28 @@
 const fs = require("fs");
 const path = require("path");
 
-function readKbJson() {
-  // When deployed on SWA, the repo files are available in the function app filesystem.
-  // This path works both locally and in SWA build output.
-  const kbPath = path.join(process.cwd(), "web", "data", "kb_dummy_v1.json");
-  const raw = fs.readFileSync(kbPath, "utf8");
-  return JSON.parse(raw);
+async function readKbJson(req) {
+  // In Azure Static Web Apps, the API filesystem does NOT include the web/ folder.
+  // The KB is deployed as a static asset at /data/kb_dummy_v1.json.
+  const host =
+    (req.headers && (req.headers["x-forwarded-host"] || req.headers["host"])) ||
+    process.env.WEBSITE_HOSTNAME;
+
+  const proto =
+    (req.headers && req.headers["x-forwarded-proto"]) || "https";
+
+  if (!host) {
+    throw new Error("Could not determine host to fetch KB (missing host headers).");
+  }
+
+  const url = `${proto}://${host}/data/kb_dummy_v1.json`;
+
+  const resp = await fetch(url, { method: "GET" });
+  if (!resp.ok) {
+    const txt = await resp.text();
+    throw new Error(`Failed to fetch KB from ${url} (${resp.status}): ${txt.slice(0, 200)}`);
+  }
+  return await resp.json();
 }
 
 const SYSTEM_PROMPT = `
@@ -270,7 +286,7 @@ module.exports = async function (context, req) {
       return;
     }
 
-    const kb = readKbJson();
+    const kb = readKbJson(req);
     const inputs = req.body || {};
 
     const userMsg =
