@@ -313,6 +313,7 @@ module.exports = async function (context, req) {
     if (!endpoint || !apiKey || !deployment) {
       context.res = {
         status: 500,
+        headers: { "Content-Type": "application/json" },
         body: {
           error:
             "Missing env vars. Set AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY, AZURE_OPENAI_DEPLOYMENT in Azure Static Web Apps configuration.",
@@ -349,10 +350,15 @@ if (typeof inputs === "string") {
       headers: { "Content-Type": "application/json" },
       body: parsed,
     };
-  } catch (err) {
-    context.res = {
-      status: 500,
-      body: { error: err.message || String(err) },
-    };
-  }
-};
+ } catch (err) {
+  context.res = {
+    status: 500,
+    headers: { "Content-Type": "application/json" },
+    body: {
+      error: err?.message || String(err),
+      // helpful during debugging; safe to keep for MVP
+      stack: err?.stack || null,
+    },
+  };
+}
+
