@@ -189,16 +189,66 @@ const JSON_SCHEMA = {
           risk_compliance: { type: "array", items: { type: "string" } },
         },
       },
-      objection_handling: {
+     objection_handling: {
+  type: "object",
+  additionalProperties: false,
+  required: ["finance", "care_delivery", "technology", "risk_compliance"],
+  properties: {
+    finance: {
+      type: "array",
+      items: {
         type: "object",
         additionalProperties: false,
-        required: ["finance", "care_delivery", "technology", "risk_compliance"],
+        required: ["objection", "response", "proof"],
         properties: {
-          finance: { type: "array", items: { type: "object" } },
-          care_delivery: { type: "array", items: { type: "object" } },
-          technology: { type: "array", items: { type: "object" } },
-          risk_compliance: { type: "array", items: { type: "object" } },
+          objection: { type: "string" },
+          response: { type: "string" },
+          proof: { type: "array", items: { type: "string" } },
         },
+      },
+    },
+    care_delivery: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["objection", "response", "proof"],
+        properties: {
+          objection: { type: "string" },
+          response: { type: "string" },
+          proof: { type: "array", items: { type: "string" } },
+        },
+      },
+    },
+    technology: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["objection", "response", "proof"],
+        properties: {
+          objection: { type: "string" },
+          response: { type: "string" },
+          proof: { type: "array", items: { type: "string" } },
+        },
+      },
+    },
+    risk_compliance: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["objection", "response", "proof"],
+        properties: {
+          objection: { type: "string" },
+          response: { type: "string" },
+          proof: { type: "array", items: { type: "string" } },
+        },
+      },
+    },
+  },
+},
+
       },
       traceability: {
         type: "object",
