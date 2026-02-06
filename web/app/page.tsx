@@ -131,9 +131,23 @@ export default function Page() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || `Request failed (${res.status})`);
-      setResult(data);
+      const rawText = await res.text();
+
+let data: any = null;
+try {
+  data = rawText ? JSON.parse(rawText) : null;
+} catch {
+  // non-JSON response (e.g., HTML error page)
+}
+
+if (!res.ok) {
+  const msg = data?.error || rawText || `Request failed (${res.status})`;
+  throw new Error(msg);
+}
+
+if (!data) throw new Error("API returned empty/non-JSON response.");
+setResult(data);
+
     } catch (e: any) {
       setError(e?.message || String(e));
     } finally {
