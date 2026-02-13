@@ -65,7 +65,10 @@ export default function Page() {
 
   const initiativeOptions = useMemo(() => {
     if (!kb) return [];
-    return Object.entries(kb.initiatives).map(([id, obj]) => ({ id, label: obj.name }));
+    return Object.entries(kb.initiatives).map(([id, obj]) => ({
+      id,
+      label: obj.name,
+    }));
   }, [kb]);
 
   const engineOptions: { id: Engine; label: string }[] = [
@@ -89,31 +92,37 @@ export default function Page() {
   ];
 
   function toggleSecondary(engine: Engine) {
-    setSecondaryEngines((prev) => (prev.includes(engine) ? prev.filter((e) => e !== engine) : [...prev, engine]));
+    setSecondaryEngines((prev) =>
+      prev.includes(engine) ? prev.filter((e) => e !== engine) : [...prev, engine]
+    );
   }
-function onReset() {
-  setBuyingJobId("problem_identification");
-  setPrimaryEngine("finance");
-  setSecondaryEngines([]);
-  setAudienceType("executive");
-  setPriority("high");
-  setTriggerContext("");
-  setResult(null);
-  setError("");
-}
+
+  function onReset() {
+    setBuyingJobId("problem_identification");
+    setPrimaryEngine("finance");
+    setSecondaryEngines([]);
+    setAudienceType("executive");
+    setPriority("high");
+    setTriggerContext("");
+    setResult(null);
+    setError("");
+  }
 
   async function onGenerate() {
     setError("");
     setResult(null);
 
     if (!initiativeId) return setError("Select an initiative.");
-    if (!triggerContext.trim()) return setError("Add a short trigger context (1–2 sentences).");
+    if (!triggerContext.trim())
+      return setError("Add a short trigger context (1–2 sentences).");
 
     const payload: RecommendRequest = {
       initiative_id: initiativeId,
       buying_job_id: buyingJobId,
       primary_engine: primaryEngine,
-      secondary_engines: secondaryEngines.filter((e) => e !== primaryEngine),
+      secondary_engines: secondaryEngines.filter(
+        (e) => e !== primaryEngine
+      ),
       audience_type: audienceType,
       strategic_priority: priority,
       trigger_context: triggerContext.trim(),
@@ -134,10 +143,14 @@ function onReset() {
       } catch {}
 
       if (!res.ok) {
-        const msg = data?.error || rawText || `Request failed (${res.status})`;
+        const msg =
+          data?.error || rawText || `Request failed (${res.status})`;
         throw new Error(msg);
       }
-      if (!data) throw new Error("API returned empty/non-JSON response.");
+
+      if (!data)
+        throw new Error("API returned empty/non-JSON response.");
+
       setResult(data);
     } catch (e: any) {
       setError(e?.message || String(e));
@@ -148,6 +161,7 @@ function onReset() {
 
   const selectedInitiativeLabel =
     initiativeOptions.find((x) => x.id === initiativeId)?.label || "—";
+
   const selectedBuyingJobLabel =
     buyingJobOptions.find((x) => x.id === buyingJobId)?.label || "—";
 
@@ -155,89 +169,74 @@ function onReset() {
     <div className="container">
       <div className="topbar">
         <div className="brand">
-          <div className="badge" aria-hidden="true" />
+          <div className="badge" />
           <div className="title">
             <h1>CRAM Demand</h1>
             <p>Content recommendation engine • structured outputs • dummy KB v1</p>
           </div>
         </div>
-        <div className="kpi" aria-label="context chips">
-          <div className="chip">Initiative: {selectedInitiativeLabel}</div>
-          <div className="chip">Buying Job: {selectedBuyingJobLabel}</div>
-        </div>
       </div>
 
       <div className="grid">
-        {/* Inputs */}
+        {/* LEFT: INPUTS */}
         <div className="card">
           <div className="cardHead">
-            <h2>Inputs</h2>
-            <span className="note">Required: initiative + trigger context</span>
+            <h2>Input Parameters</h2>
           </div>
           <div className="cardBody">
-            <label className="label">Initiative</label>
-            <select className="select" value={initiativeId} onChange={(e) => setInitiativeId(e.target.value)}>
-              {initiativeOptions.map((opt) => (
-                <option key={opt.id} value={opt.id}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+            <div className="formStack">
+              <div className="formGroup">
+                <label className="label">Initiative</label>
+                <select
+                  className="select"
+                  value={initiativeId}
+                  onChange={(e) => setInitiativeId(e.target.value)}
+                >
+                  {initiativeOptions.map((opt) => (
+                    <option key={opt.id} value={opt.id}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div style={{ height: 12 }} />
+              <div className="formGroup">
+                <label className="label">Buying Job</label>
+                <select
+                  className="select"
+                  value={buyingJobId}
+                  onChange={(e) =>
+                    setBuyingJobId(e.target.value)
+                  }
+                >
+                  {buyingJobOptions.map((opt) => (
+                    <option key={opt.id} value={opt.id}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <label className="label">Buying Job</label>
-            <select className="select" value={buyingJobId} onChange={(e) => setBuyingJobId(e.target.value)}>
-              {buyingJobOptions.map((opt) => (
-                <option key={opt.id} value={opt.id}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-
-            <div style={{ height: 12 }} />
-
-            <div className="row2">
-              <div>
+              <div className="formGroup">
                 <label className="label">Primary Engine</label>
-                <select className="select" value={primaryEngine} onChange={(e) => setPrimaryEngine(e.target.value as Engine)}>
+                <select
+                  className="select"
+                  value={primaryEngine}
+                  onChange={(e) =>
+                    setPrimaryEngine(e.target.value as Engine)
+                  }
+                >
                   {engineOptions.map((opt) => (
                     <option key={opt.id} value={opt.id}>
-                      {opt.label}
+                      {opt.label} Engine
                     </option>
                   ))}
                 </select>
               </div>
 
-              <div>
-                <label className="label">Audience Type</label>
-                <select className="select" value={audienceType} onChange={(e) => setAudienceType(e.target.value as Audience)}>
-                  {audienceOptions.map((opt) => (
-                    <option key={opt.id} value={opt.id}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div style={{ height: 12 }} />
-
-            <div className="row2">
-              <div>
-                <label className="label">Strategic Priority</label>
-                <select className="select" value={priority} onChange={(e) => setPriority(e.target.value as Priority)}>
-                  {priorityOptions.map((opt) => (
-                    <option key={opt.id} value={opt.id}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
+              <div className="formGroup">
                 <label className="label">Secondary Engines</label>
-                <div className="pills" style={{ marginTop: 2 }}>
+                <div className="pills">
                   {engineOptions.map((opt) => (
                     <label key={opt.id} className="pill">
                       <input
@@ -245,292 +244,174 @@ function onReset() {
                         checked={secondaryEngines.includes(opt.id)}
                         onChange={() => toggleSecondary(opt.id)}
                       />
-                      {opt.label}
+                      {opt.label} Engine
                     </label>
                   ))}
                 </div>
               </div>
+
+              <div className="row2">
+                <div className="formGroup">
+                  <label className="label">Strategic Priority</label>
+                  <select
+                    className="select"
+                    value={priority}
+                    onChange={(e) =>
+                      setPriority(e.target.value as Priority)
+                    }
+                  >
+                    {priorityOptions.map((opt) => (
+                      <option key={opt.id} value={opt.id}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="formGroup">
+                  <label className="label">Audience Type</label>
+                  <select
+                    className="select"
+                    value={audienceType}
+                    onChange={(e) =>
+                      setAudienceType(e.target.value as Audience)
+                    }
+                  >
+                    {audienceOptions.map((opt) => (
+                      <option key={opt.id} value={opt.id}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="formGroup">
+                <label className="label">Trigger Context</label>
+                <textarea
+                  className="textarea"
+                  value={triggerContext}
+                  onChange={(e) =>
+                    setTriggerContext(e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="actionRow">
+                <button
+                  className="btnSecondary"
+                  onClick={onReset}
+                  type="button"
+                >
+                  Reset
+                </button>
+
+                <button
+                  className="btn btnPrimary"
+                  onClick={onGenerate}
+                  disabled={loading}
+                  type="button"
+                >
+                  {loading
+                    ? "Generating..."
+                    : "Generate Recommendation"}
+                </button>
+              </div>
+
+              {error && <div className="alert">{error}</div>}
             </div>
-
-            <div style={{ height: 12 }} />
-
-            <label className="label">Trigger Context</label>
-            <textarea
-              className="textarea"
-              value={triggerContext}
-              onChange={(e) => setTriggerContext(e.target.value)}
-              placeholder="Example: Q3 denial rates exceeded 15%; oncology starts delayed; CFO requested a cost-reduction plan while IT flagged integration risk."
-            />
-
-            <div style={{ height: 12 }} />
-
-            <div className="actionRow">
-  <button className="btnSecondary" onClick={onReset} type="button">
-    Reset
-  </button>
-
-  <button className="btn btnPrimary" onClick={onGenerate} disabled={loading} type="button">
-    {loading ? "Generating..." : "Generate Recommendation"}
-    <svg className="btnIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M5 12h12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M13 6l6 6-6 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  </button>
-</div>
-
-
-            {error && <div className="alert">{error}</div>}
           </div>
         </div>
 
-        {/* Output */}
+        {/* RIGHT: OUTPUT */}
         <div className="card">
           <div className="cardHead">
             <h2>Recommendation</h2>
-            <span className="note">{result ? "Result ready" : "Run inputs to generate"}</span>
           </div>
 
           <div className="cardBody">
             {!result && (
-              <div>
-                <p style={{ marginTop: 0, color: "var(--muted)" }}>
-                  You’ll get ranked asset recommendations, build spec, proof requirements, and traceability.
-                </p>
-                <div className="hr" />
-                <p className="note" style={{ margin: 0 }}>
-                  Tip: Use trigger context to surface urgency, objections, or constraints (budget, integration, compliance).
-                </p>
+              <div className="note">
+                Run inputs to generate a recommendation.
               </div>
             )}
 
             {result && (
-      <div className="hero" style={{ marginBottom: 14 }}>
-  <div className="heroGrid">
-    <div>
-      <div className="heroLabel">Initiative</div>
-      <div className="heroValue">{selectedInitiativeLabel}</div>
-      <div className="heroChips">
-        <span className="heroChip">
-          {engineOptions.find(e => e.id === primaryEngine)?.label} Engine
-        </span>
-        {secondaryEngines.slice(0, 3).map((e) => (
-          <span key={e} className="heroChip">
-            {engineOptions.find(x => x.id === e)?.label} Engine
-          </span>
-        ))}
-      </div>
-    </div>
-
-    <div>
-      <div className="heroLabel">Buying Job</div>
-      <div className="heroValue">{selectedBuyingJobLabel}</div>
-      <div style={{ marginTop: 10 }}>
-        <div className="heroLabel">Priority / Audience</div>
-        <div className="heroValue">
-          {priority.charAt(0).toUpperCase() + priority.slice(1)} •{" "}
-          {audienceOptions.find(a => a.id === audienceType)?.label}
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div className="subtleDivider" style={{ background: "rgba(255,255,255,0.12)" }} />
-
-  <div>
-    <div className="heroLabel">Trigger Context</div>
-    <div className="heroValue" style={{ fontWeight: 700 }}>
-      {triggerContext || "—"}
-    </div>
-  </div>
-</div>
-
               <>
-                <div className="asset" style={{ background: "linear-gradient(180deg, var(--tint-cyan), #fff)" }}>
-                  <div className="assetTitle">
-                    <strong>Trigger summary</strong>
-                  </div>
-                  <div style={{ marginTop: 6 }}>{result.trigger_context_summary}</div>
-                </div>
+                {/* HERO SUMMARY */}
+                <div className="hero">
+                  <div className="heroGrid">
+                    <div>
+                      <div className="heroLabel">
+                        Initiative
+                      </div>
+                      <div className="heroValue">
+                        {selectedInitiativeLabel}
+                      </div>
+                    </div>
 
-                <div style={{ height: 12 }} />
-
-                <div className="asset">
-                  <div className="assetTitle">
-                    <strong>Top 3 recommended assets</strong>
-                    <span className="note">Ranked</span>
-                  </div>
-
-                  <div className="assetGrid">
-                    {(result.recommended_assets || []).map((a: any) => (
-  <div
-    key={a.rank}
-    className={`rankCard ${a.rank === 1 ? "rankCardTop" : ""}`}
-  >
-    <div className="rankHead">
-      <div className="rankBadge">{a.rank}</div>
-      <div className="rankTitle">
-        <strong>{a.asset_type}</strong>
-        <div className="desc">{a.use_case}</div>
-      </div>
-      <div className="note" style={{ marginLeft: "auto", fontWeight: 800 }}>
-        {a.confidence} confidence
-      </div>
-    </div>
-
-    <div className="kvRow">
-      <span className="kv">Channel: {a.primary_channel}</span>
-      <span className="kv">Format: {a.format}</span>
-      <span className="kv">Audience: {a.audience_alignment}</span>
-    </div>
-
-    <div className="subtleDivider" />
-
-    <div style={{ display: "grid", gap: 10 }}>
-      <div>
-        <div style={{ fontWeight: 900, fontSize: 12, color: "var(--cmm-navy)" }}>Why recommended</div>
-        <ul>
-          {(a.why_recommended || []).map((w: string, i: number) => <li key={i}>{w}</li>)}
-        </ul>
-      </div>
-
-      <div>
-        <div style={{ fontWeight: 900, fontSize: 12, color: "var(--cmm-navy)" }}>Artifacts supported</div>
-        <div className="note" style={{ fontSize: 13 }}>
-          {(a.supported_internal_artifacts || []).join(", ")}
-        </div>
-      </div>
-    </div>
-  </div>
-))}
-<div style={{ marginTop: 14 }}>
-  <div className="moduleTitle">
-    <div className="iconBox" aria-hidden="true">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-        <path d="M4 19c4-8 12-8 16 0" stroke="var(--cmm-navy)" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M12 5v6l4 2" stroke="var(--cmm-navy)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    </div>
-    <h3>Required Proof Elements</h3>
-    <span className="meta">What this asset must prove</span>
-  </div>
-
-  <div className="columns3">
-    <div className="miniCard">
-      <h4>Metric Types</h4>
-      <ul>
-        {(result.proof_requirements?.financial || []).slice(0, 3).map((x: string, i: number) => <li key={i}>{x}</li>)}
-      </ul>
-    </div>
-
-    <div className="miniCard">
-      <h4>Evidence Types</h4>
-      <ul>
-        {(result.proof_requirements?.operational || []).slice(0, 3).map((x: string, i: number) => <li key={i}>{x}</li>)}
-      </ul>
-    </div>
-
-    <div className="miniCard">
-      <h4>Risk Mitigation</h4>
-      <ul>
-        {(result.proof_requirements?.risk_compliance || []).slice(0, 3).map((x: string, i: number) => <li key={i}>{x}</li>)}
-      </ul>
-    </div>
-  </div>
-</div>
-
-
-                <div style={{ height: 12 }} />
-
-                <div className="asset" style={{ background: "linear-gradient(180deg, var(--tint-magenta), #fff)" }}>
-                  <div className="assetTitle">
-                    <strong>Build spec for #1</strong>
-                    <span className="note">
-                      {result.top_asset_build_spec?.primary_channel} • {result.top_asset_build_spec?.format}
-                    </span>
+                    <div>
+                      <div className="heroLabel">
+                        Buying Job
+                      </div>
+                      <div className="heroValue">
+                        {selectedBuyingJobLabel}
+                      </div>
+                    </div>
                   </div>
 
-                  <div style={{ marginTop: 8 }}>
-                    <div style={{ fontWeight: 800, fontSize: 12, color: "var(--cmm-navy)" }}>Messaging angle</div>
-                    <div>{result.top_asset_build_spec?.messaging_angle}</div>
-                  </div>
+                  <div className="subtleDivider" />
 
-                  <div style={{ marginTop: 12 }}>
-                    <div style={{ fontWeight: 800, fontSize: 12, color: "var(--cmm-navy)" }}>Outline</div>
-                    <div style={{ marginTop: 6 }}>
-                      {(result.top_asset_build_spec?.outline || []).map((s: any, idx: number) => (
-                        <div key={idx} className="asset" style={{ boxShadow: "none", marginTop: 8 }}>
-                          <div className="assetTitle">
-                            <strong style={{ fontSize: 13 }}>{s.section_title}</strong>
-                            <span className="note">Section {idx + 1}</span>
-                          </div>
-                          <div className="note" style={{ fontSize: 13, marginTop: 6 }}>
-                            {s.section_goal}
-                          </div>
-                          <div style={{ marginTop: 8 }}>
-                            <div style={{ fontWeight: 800, fontSize: 12, color: "var(--cmm-navy)" }}>
-                              Required elements
-                            </div>
-                            <ul>
-                              {(s.required_elements || []).map((x: string, i: number) => (
-                                <li key={i}>{x}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
-                      ))}
+                  <div>
+                    <div className="heroLabel">
+                      Trigger Context
+                    </div>
+                    <div className="heroValue">
+                      {triggerContext}
                     </div>
                   </div>
                 </div>
 
-                <div style={{ height: 12 }} />
+                {/* RECOMMENDED ASSETS */}
+                <div style={{ marginTop: 16 }}>
+                  <div className="moduleTitle">
+                    <h3>Recommended Assets (Ranked)</h3>
+                  </div>
 
-                <details className="asset">
-                  <summary style={{ cursor: "pointer", fontWeight: 800 }}>Raw JSON</summary>
-                  <pre style={{ marginTop: 10 }}>{JSON.stringify(result, null, 2)}</pre>
-                </details>
+                  <div style={{ display: "grid", gap: 12 }}>
+                    {(result.recommended_assets || []).map(
+                      (a: any) => (
+                        <div
+                          key={a.rank}
+                          className={`rankCard ${
+                            a.rank === 1
+                              ? "rankCardTop"
+                              : ""
+                          }`}
+                        >
+                          <div className="rankHead">
+                            <div className="rankBadge">
+                              {a.rank}
+                            </div>
+                            <div className="rankTitle">
+                              <strong>
+                                {a.asset_type}
+                              </strong>
+                              <div className="desc">
+                                {a.use_case}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
               </>
             )}
           </div>
         </div>
       </div>
-
-      <div style={{ marginTop: 14, textAlign: "center" }} className="note">
-        Internal MVP • guardrailed to KB • replace KB later without UI rewrite
-      </div>
     </div>
   );
 }
-<div style={{ marginTop: 14 }}>
-  <div className="moduleTitle">
-    <div className="iconBox" aria-hidden="true">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-        <path d="M12 9v4" stroke="var(--cmm-navy)" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M12 17h.01" stroke="var(--cmm-navy)" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M10.3 4.8l-7.6 13.2A2 2 0 004.4 21h15.2a2 2 0 001.7-3l-7.6-13.2a2 2 0 00-3.4 0z" stroke="var(--cmm-navy)" strokeWidth="2" strokeLinejoin="round"/>
-      </svg>
-    </div>
-    <h3>Likely Objections to Address</h3>
-    <span className="meta">By stakeholder engine</span>
-  </div>
-
-  <div className="engineGrid">
-    {[
-      { key: "finance", label: "Finance Engine", dot: "var(--cmm-magenta)" },
-      { key: "care_delivery", label: "Care Delivery Engine", dot: "var(--cmm-cyan)" },
-      { key: "technology", label: "Technology Engine", dot: "var(--cmm-orange)" },
-      { key: "risk_compliance", label: "Risk & Compliance Engine", dot: "var(--cmm-navy)" },
-    ].map((eng) => (
-      <div key={eng.key} className="engineCard">
-        <div className="engineCardHead">
-          <span className="engineDot" style={{ background: eng.dot }} />
-          <strong>{eng.label}</strong>
-        </div>
-        <ul style={{ margin: 0, paddingLeft: 18 }}>
-          {(result.objection_handling?.[eng.key] || []).slice(0, 3).map((o: any, i: number) => (
-            <li key={i}>{o.objection}</li>
-          ))}
-        </ul>
-      </div>
-    ))}
-  </div>
-</div>
